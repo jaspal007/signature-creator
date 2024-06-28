@@ -1,6 +1,11 @@
+// ignore_for_file: unused_local_variable, avoid_print, use_build_context_synchronously
+
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hand_signature/signature.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sig_app/global_variable.dart';
 
@@ -51,9 +56,34 @@ class Signature extends StatefulWidget {
   State<Signature> createState() => _SignatureState();
 }
 
+Future<File> getImage(Future<ByteData?> img) async {
+  final byteData = await img;
+  Directory appDocDir = await getApplicationDocumentsDirectory();
+  String imgAppDir = appDocDir.path;
+  final file = await File('$imgAppDir/sign.png').create(recursive: true);
+  await file.writeAsBytes(byteData!.buffer
+      .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+  print('file path: $file');
+  return file;
+}
+
+Future<void> saveImage(Future<ByteData?> img) async {
+  late File image;
+  await getImage(img).then((file) => image = file);
+  // print('image: $image');
+  final extDir = await getExternalStorageDirectory();
+  final path = '${extDir!.path}/images';
+  String basename = 'sign.png';
+  // print('path: $path');
+  final file = await File('$path/$basename').create(recursive: true);
+  // print('newImage1: $file');
+  File newImage = await image.copy("$path/$basename");
+  // print('newImage2: ${newImage.path}');
+}
+
 class _SignatureState extends State<Signature> {
   late SharedPreferences pref;
-  Color? dropDownValue = colors[1];
+  Color? dropDownValue = colors[2];
   bool active = false;
   @override
   void initState() {
@@ -72,13 +102,20 @@ class _SignatureState extends State<Signature> {
     pref = await SharedPreferences.getInstance();
     print('initialized');
     setState(() {
-      dropDownValue = colors[pref.getInt('token')!];
+      dropDownValue =
+          colors[(pref.getInt('token') == null) ? 0 : pref.getInt('token')!];
     });
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    signatureControl.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    HandSignature signature = HandSignature(
+    var signature = HandSignature(
       control: signatureControl,
       color: dropDownValue!,
       width: 1.0,
@@ -122,7 +159,7 @@ class _SignatureState extends State<Signature> {
               await pref.setInt('token', id);
               print(pref.getInt('token'));
               Color? color = colors[pref.getInt('token')!];
-              print('color: ${color}');
+              print('color: $color');
             },
           ),
         ],
@@ -177,8 +214,8 @@ class _SignatureState extends State<Signature> {
                 ElevatedButton(
                   onPressed: (active)
                       ? () {
-                          final png = signatureControl.toImage();
-                          final svg = signatureControl.toSvg();
+                          final png = signature.control.toImage();
+                          final svg = signature.control.toSvg();
                           showDialog(
                             context: context,
                             builder: (BuildContext context) => AlertDialog(
@@ -205,7 +242,30 @@ class _SignatureState extends State<Signature> {
                                   child: const Text('Cancel'),
                                 ),
                                 TextButton(
-                                  onPressed: () {},
+                                  onPressed: () async {
+                                    try {
+                                      await saveImage(png);
+                                    } catch (err) {
+                                      print(err);
+                                      SnackBar snackBar = const SnackBar(
+                                          content: Text('Failed to save'));
+                                      ScaffoldMessenger.of(context)
+                                          .clearSnackBars();
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(snackBar);
+                                      return;
+                                    }
+                                    SnackBar snackBar = const SnackBar(
+                                        content: Text(
+                                            'Successfully saved in the app directory'));
+
+                                    ScaffoldMessenger.of(context)
+                                        .clearSnackBars();
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(snackBar);
+
+                                    Navigator.pop(context);
+                                  },
                                   child: const Text('Download'),
                                 ),
                               ],
