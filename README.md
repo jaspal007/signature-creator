@@ -1,16 +1,57 @@
-# sig_app
+# Signature Creator
 
-A new Flutter project.
+Signature Creator is a Flutter-based Android application that allows users to create their own signatures and download them in PNG format. The app supports multiple ink colors for a customized signature creation experience.
+
+## Features
+
+- Create custom signatures
+- Download signatures in PNG format
+- Multiple ink color support
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+### Prerequisites
 
-A few resources to get you started if this is your first Flutter project:
+- Flutter SDK
+- Android Studio or any IDE supporting Flutter development
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Installation
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/jaspal007/signature-creator.git
+   ```
+2. Navigate to the project directory:
+   ```bash
+   cd signature-creator
+   ```
+3. Install dependencies:
+   ```bash
+   flutter pub get
+   ```
+4. Run the application:
+   ```bash
+   flutter run
+   ```
+
+## Usage
+
+- Open the app on your Android device.
+- Create your signature using the provided tools.
+- Save your signature in PNG format.
+
+## Contributing
+
+Contributions are welcome! Please fork the repository and submit a pull request.
+
+## License
+
+This project is licensed under the MIT License.
+
+## Contact
+
+For any questions or feedback, please contact [jaspal007](https://github.com/jaspal007).
+
+---
+
+This README provides an overview of the project, installation instructions, usage guidelines, and contribution information.
